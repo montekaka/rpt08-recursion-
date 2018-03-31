@@ -7,22 +7,22 @@
 var getElementsByClassName = function(className) {
   // your code here
   var result = [];
-  var docBody = document.body;
-  //console.log(docBody);
+  var element = document.body;
+  var nodes = [];
+  // if(element && element.classList && element.classList.value) {
+  //   var classList = element.classList.value.split(" ");
+  // }
+  //
+  var travelNodes = function(ele){
+    if(ele.childNodes && ele.childNodes.length > 0) {
+      //console.log('hello');
+      var element = ele.childNodes[0];
+      travelNodes(element);
+    } else {
+        console.log('gg')
+        console.log(ele);
+    }
+  }
 
- //  if(docBody.classList) {
- //  	if(docBody.classList.value === className){
-	// 		result.push(docBody);
- //  	}  	
- //  } 
-	// var nodes = docBody.childNodes;
- //  for(var i = 0; i < nodes.length; i++) {
- //  	if(nodes[i].classList && (nodes[i].classList.value.split(" ")).includes(className) ) {
- //  		result.push(nodes[i]);  		
- //  		//console.log(nodes[i])
- //  	}  	
- //  }  
- //  //console.log(result)
- //  return result;
-
+  travelNodes(element);
 };
