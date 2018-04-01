@@ -19,16 +19,18 @@ var stringifyJSON = function(obj) {
 		var objValues = [];
 		for(var i = 0; i < keys.length; i++) {
 			var key = keys[i];
-			objValues.push('"'+String(key)+'"' + ":" + stringifyJSON(obj[key]));
+			if(obj[key] !== undefined && s.call(obj[key]) !== "[object Function]") {
+				objValues.push('"'+String(key)+'"' + ":" + stringifyJSON(obj[key]));
+			}		
 		}
 		result = "{"+objValues.join(",")+"}";
 	}
 	else {
 		if(s.call(obj) === "[object String]") {
-			result = result +  '"'+String(obj)+'"';
+			result = '"'+String(obj)+'"';
 		} 
 		else {
-			result = result +  String(obj);
+			result = String(obj);
 		} 
 	} 
 	return result;
