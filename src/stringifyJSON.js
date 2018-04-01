@@ -14,7 +14,16 @@ var stringifyJSON = function(obj) {
 			strObjs.push(stringifyJSON(o));
 		}
 		result = "["+strObjs.join(",")+"]";
-	} else {
+	} else if(s.call(obj) === "[object Object]") {
+		var keys = Object.keys(obj);
+		var objValues = [];
+		for(var i = 0; i < keys.length; i++) {
+			var key = keys[i];
+			objValues.push('"'+String(key)+'"' + ":" + stringifyJSON(obj[key]));
+		}
+		result = "{"+objValues.join(",")+"}";
+	}
+	else {
 		if(s.call(obj) === "[object String]") {
 			result = result +  '"'+String(obj)+'"';
 		} 
