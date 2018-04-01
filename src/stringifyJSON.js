@@ -4,5 +4,11 @@
 // but you don't so you're going to write it from scratch:
 
 var stringifyJSON = function(obj) {
-  // your code goes here
+	// check if the obj is a string
+	var s = Object.prototype.toString; 
+	if(s.call(obj) === "[object String]") {
+		return '"'+String(obj)+'"';
+	} else {
+		return String(obj);
+	}  
 };
