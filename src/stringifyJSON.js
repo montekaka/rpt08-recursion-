@@ -6,9 +6,22 @@
 var stringifyJSON = function(obj) {
 	// check if the obj is a string
 	var s = Object.prototype.toString; 
-	if(s.call(obj) === "[object String]") {
-		return '"'+String(obj)+'"';
+	var result = '';
+	if(s.call(obj) === "[object Array]"){
+		var strObjs = [];
+		for(var i = 0; i < obj.length; i++) {
+			var o = obj[i];
+			strObjs.push(stringifyJSON(o));
+		}
+		result = "["+strObjs.join(",")+"]";
 	} else {
-		return String(obj);
-	}  
+		if(s.call(obj) === "[object String]") {
+			result = result +  '"'+String(obj)+'"';
+		} 
+		else {
+			result = result +  String(obj);
+		} 
+	} 
+	return result;
 };
+
