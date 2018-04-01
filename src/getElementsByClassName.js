@@ -9,20 +9,29 @@ var getElementsByClassName = function(className) {
   var result = [];
   var element = document.body;
   var nodes = [];
-  // if(element && element.classList && element.classList.value) {
-  //   var classList = element.classList.value.split(" ");
-  // }
-  //
-  var travelNodes = function(ele){
-    if(ele.childNodes && ele.childNodes.length > 0) {
-      //console.log('hello');
-      var element = ele.childNodes[0];
-      travelNodes(element);
-    } else {
-        console.log('gg')
-        console.log(ele);
-    }
+  
+  var includesClassName = function(ele, className){
+    	if(ele.classList){
+    		var classList = ele.classList.value.split(" ");
+    		if(classList.includes(className)){
+    			return ele;
+    		}    		
+    	}
   }
 
-  travelNodes(element);
+  var fetchNodes = function(ele){  
+		if(includesClassName(ele, className)) {
+			nodes.push(ele);
+		}  	  	
+    if(ele.childNodes.length > 0) {
+    	for(var i = 0; i < ele.childNodes.length; i++){    		
+    		var element = ele.childNodes[i];  	
+    		fetchNodes(element);
+    	}     
+    } else {  
+    	return -1;
+    }
+  }
+  fetchNodes(element);
+  return nodes;
 };
