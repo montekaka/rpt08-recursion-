@@ -1,7 +1,7 @@
 // test cases are described in fixtures.js
 describe('parseJSON', function() {
 
-  it('should match the result of calling JSON.parse', function() {
+  it('should match the result of calling JSON.parse', function() {    
     parseableStrings.forEach(function(test) {
       var result = parseJSON(test);
       var expected = JSON.parse(test);
