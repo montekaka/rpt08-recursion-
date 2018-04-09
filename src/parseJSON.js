@@ -9,15 +9,8 @@ var parseJSON = function(json) {
   // determine if the str is object, array, or elements 
   var result = setResultVar(json);
   var result_type = getJSONType(json);
-
-  if(result) {
-    var json = remvoeBracket(json);  
-    var jsonStrs = parseStr(json);   
-    result = setupObject(jsonStrs, result);
-    return result;    
-  } else {
-    return json;
-  }  
+  var jsonStrs = parseObjectType(json);
+  result = setupObject(jsonStrs);
   return result;
 
 };
@@ -68,112 +61,109 @@ var remvoeBracket = function(str){
   return str;
 }
 
-var quotationReducer = function(quotationCount, cb){
-  if(quotationCount === 2) {
-    cb(0);
-    return 0;
-  } else {
-    cb(quotationCount);
-    return quotationCount;
+var parseObjectType = function(str) {
+  var strs = [];
+  var str = remvoeBracket(str);
+  // find all commas (",") sit outside of the quotations
+  var commasIdx = [];
+  var colonIdx = [];
+  if(str.split.length > 0) {
+    commasIdx = findCommas(str);
   }
+  var startIdx = 0;
+  commasIdx.forEach(function(idx){
+    if(startIdx > 0){
+      startIdx+=1;
+    }
+    var chars = str.split("").slice(startIdx, idx);
+    var finalStr = trimStr(chars.join(''));
+    strs.push(finalStr);
+    startIdx = idx;
+  });
+
+  return strs;
 }
 
-var getSimpleString = function(ele, strEles) {
-  strEles.push(ele);
-}
+var findCommas = function(str) {
+  return findPunctuation(str, ",");
+};
 
-var getStringBetweenQuotations = function(quotationCount, ele, strEles, result){  
-  if(quotationCount > 0) {    
-    if(ele !== "\""){
-      strEles.push(ele);
-    }    
-  } else {
-    result.push(strEles.join(""));
-    strEles = [];
-  }    
+var findColons = function(str) {
+  return findPunctuation(str, ":");
+};
 
-  return strEles;
-}
-
-var updateStrsWithoutQuotations = function(quotationCount, strEles, result){
-  if(strEles.length > 0){
-    result.push(strEles.join(""));
-    return strEles = [];
-  }
-  return strEles;
-}
-
-var removePunctuation = function(str) {
-  var str = str.split(',').join('');
-  return str.split(":").join('');
-}
-
-
-var parseStr = function(str) {
-  var resultStrs =[];
-  var strEles = [];
-  var strEleswoq = []; // for the one without quotation marks
-  var quotationCount = 0;
+var findPunctuation = function(str, punctuation) {
+  var quotationsCount = 0;
   var strs = str.split('');
+  var result = [];
+  var colonIdx = [];
   for(var i = 0; i < strs.length; i++) {
-    var char = strs[i];
-    if(char === '\"'){
-      quotationCount += 1;
+    if(strs[i] === "\"" ){
+      quotationsCount+=1;
     }
-    quotationCount = quotationReducer(quotationCount, function(quotation_count){            
-      if(quotationCount > 0) {
-        strEles = getStringBetweenQuotations(quotation_count, char, strEles, resultStrs);        
-        if(strEleswoq.length > 0 ) {
-          //resultStrs.push(removePunctuation(strEleswoq.join('')))
-          addToResultArr(resultStrs, removePunctuation(strEleswoq.join('')));
-        }
-        strEleswoq = [];
-      } else {          
-        getSimpleString(char, strEleswoq);     
-      }
-    });
-    if(i === strs.length - 1 && strEleswoq.length > 0 ){
-      //resultStrs.push(removePunctuation(strEleswoq.join('')));  
-      addToResultArr(resultStrs, removePunctuation(strEleswoq.join('')));
-    }
-  }
-  return resultStrs;
+    quotationsCount = quoationCountReducer(quotationsCount);     
+    getPunctuationIdx(strs, quotationsCount, i, punctuation, function(){
+      result.push(i);
+    });   
+  }  
+  var a = 1
+  if(str.split('').length > 1) {
+    a = 0;
+  };
+  result.push(str.split('').length-a);
+  return result;
 }
 
-var removeLeadingSpace = function(str){
-  if(str){
-    if(str[0] === " "){
-      var strs = str.split('');
-      strs.splice(0,1);    
-      str = strs.join('');      
-    }
-    var n = str.split('').length;
-    var n = n - 1;
-    if(str[n] === " "){
-      var strs = str.split('');
-      strs.splice(n,1);    
-      str = strs.join('');      
+
+var getPunctuationIdx = function(strs, quotationsCount, i, punctuation, cb){
+  if(quotationsCount === 0 && strs[i] === punctuation) {
+    cb();
+  }
+}
+
+var quoationCountReducer = function(quotationsCount) {
+  if(quotationsCount === 2) {
+    return 0;
+  } 
+  return quotationsCount;
+}
+
+var trimStr = function(str) {  
+  var strs = str.split('');  
+  if(strs[0] === " "){   
+    strs.splice(0,1);
+  }
+  var n = strs.length - 1;
+  if(n > 0 && strs[n] === " "){
+    strs.splice(n,1); 
+  }
+  return strs.join('');
+}
+
+var removeQuotes = function(str){
+  var strs = str.split('');
+  if(strs[0] === "\""){   
+    strs.splice(0,1);
+  }
+  var n = strs.length - 1;
+  if(strs[n] === "\""){
+    strs.splice(n,1); 
+  }
+  return strs.join('');    
+}
+
+var setupObject = function(jsonStrs) {
+  var result = {};
+  jsonStrs.forEach(function(str){
+    var colonIdx = findColons(str); 
+    if(colonIdx[0] > 0 ) {
+      var strs = str.split('');  
+      var key = trimStr(strs.slice(1, colonIdx[0]-1).join(''));
+      var val = trimStr(strs.slice(colonIdx[0]+1, colonIdx[1]).join(''));
+      val = removeQuotes(val);
+      result[key] = getStrValue(val);
     }  
-    return str;  
-  }
-  return str;
+  });
+  return result;
 }
 
-var setupObject = function(strs, obj) {
-  var i = 0;
-  while(i < strs.length){
-    var key = strs[i];
-    var val = removeLeadingSpace(strs[(i+1)]); 
-    obj[key] = getStrValue(val);
-    i += 2;
-  }
-  return obj;
-}
-
-var addToResultArr = function(array, cb){
-  
-  var ele = removeLeadingSpace(cb);
-  if(ele.length > 0 ){
-    array.push(ele);
-  }
-}
