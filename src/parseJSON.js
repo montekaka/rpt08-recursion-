@@ -10,7 +10,11 @@ var parseJSON = function(json) {
   var result = setResultVar(json);
   var result_type = getJSONType(json);
   var jsonStrs = parseObjectType(json);
-  result = setupObject(jsonStrs);
+  if(result_type === 'object') {
+    result = setupObject(jsonStrs);
+  } else {    
+    result = setupArray(jsonStrs);
+  }
   return result;
 
 };
@@ -67,9 +71,9 @@ var parseObjectType = function(str) {
   // find all commas (",") sit outside of the quotations
   var commasIdx = [];
   var colonIdx = [];
-  if(str.split.length > 0) {
+  if(str.split('').length > 0) {
     commasIdx = findCommas(str);
-  }
+  }  
   var startIdx = 0;
   commasIdx.forEach(function(idx){
     if(startIdx > 0){
@@ -167,3 +171,12 @@ var setupObject = function(jsonStrs) {
   return result;
 }
 
+var setupArray = function(jsonStrs) {
+  var result = [];
+  jsonStrs.forEach(function(str) {
+    var strVal = removeQuotes(str);
+    var strVal = getStrValue(strVal);
+    result.push(strVal);
+  });
+  return result;
+}
